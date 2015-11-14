@@ -1,0 +1,34 @@
+\documentclass{article}
+\directlua {
+tex.enableprimitives('',{'pagedir','bodydir','pardir','textdir','mathdir'})
+}
+\begin{document}
+ \raggedright
+   R-Hello world \\
+   R-hello\\
+   R-hello
+  \par
+
+ \raggedleft
+  L-Hello world \\
+  L-hello\\
+  L-hello
+  \par
+ 
+
+
+ \pardir TRT
+ \raggedright
+   R-Hello world \\
+   R-hello\\
+   R-hello
+  \par
+
+ \raggedleft
+  L-Hello world \\
+  L-hello\\
+  L-hello
+ \par
+ 
+\end{document}
+
