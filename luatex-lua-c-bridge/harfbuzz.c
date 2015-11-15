@@ -2,8 +2,15 @@
 #include <lauxlib.h>
 #include <lualib.h>
 
+// Reference: http://lua-users.org/wiki/BindingCodeToLua
+
 int shape (lua_State *L) {
   return 1;
+}
+
+int name (lua_State *L) {
+  lua_pushstring(L, "Deepak");
+  return 1;  
 }
 
 #if !defined LUA_VERSION_NUM
@@ -31,6 +38,7 @@ static void luaL_setfuncs (lua_State *L, const luaL_Reg *l, int nup) {
 
 static const struct luaL_Reg lib_table [] = {
   {"_shape", shape},
+  {"_name", name},
   {NULL, NULL}
 };
 

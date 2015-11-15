@@ -1,4 +1,4 @@
 h = require('harfbuzz')
 h._shape(nil)
-print("hi")
+print(h._name())
 
