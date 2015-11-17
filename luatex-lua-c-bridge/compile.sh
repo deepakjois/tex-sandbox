@@ -1,7 +1,7 @@
 # Taken from: http://lua-users.org/wiki/BuildingModules
 # Not very robust. Works only on Mac OS X.
 CC=cc
-SVN=/Users/deepak/code/personal
+SVN=/Users/deepak/code/personal/luatex
 L=$SVN/trunk/source/libs/lua52/lua-5.2.4/src
 rm -rf *.o *.la *.lo .libs/
 $CC -O2 -fpic -c harfbuzz.c
