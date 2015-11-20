@@ -1,0 +1,30 @@
+\documentclass[a4paper]{article}
+\usepackage{fontspec}
+\usepackage[centering,margin=1in]{geometry}
+\usepackage{enumitem}
+\usepackage{bidi}
+\newfontfamily\notourdu[Script=Arabic,Language=Urdu]{Noto Nastaliq Urdu}
+\newfontfamily\baskerville{Baskerville}
+\begin{document}
+\baskerville
+\begin{description}[style=nextline]
+   \item[foo] bar
+   \item[baz] bang
+\end{description}
+
+\setlist[description]{style=nextline}
+\renewcommand{\descriptionlabel}[1]{\hspace{\labelsep}\RLE{\large\notourdu #1}}
+\begin{description}[leftmargin=12pt]
+\item[دیپک جوئس]
+This text describes the first item.
+\item[رو]
+This text describes the second item.
+Contrary to the description of the first item, it is quite a bit longer.
+
+Additionally, it consists of multiple paragraphs, and doesn't cause problems
+since we didn't redefine the item command.
+\end{description}
+\end{document}
+
+
+I
