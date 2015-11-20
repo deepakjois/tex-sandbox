@@ -5,11 +5,14 @@
 \usepackage{bidi}
 \newfontfamily\notourdu[Script=Arabic,Language=Urdu]{Noto Nastaliq Urdu}
 \newfontfamily\baskerville{Baskerville}
+\newcommand{\seturdulabel}[1]{\item[\RLE{\notourdu #1}]\hfill\\}
 \begin{document}
 \baskerville
 \begin{description}[style=nextline]
-   \item[foo] bar
-   \item[baz] bang
+\seturdulabel{اردو}
+bar
+\item[baz]\hfill\\
+bang
 \end{description}
 
 \setlist[description]{style=nextline}
