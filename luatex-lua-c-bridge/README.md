@@ -1,6 +1,6 @@
 ## Compiling
 
-Make sure you set the right libtool in script. We need Lua 5.2 for this.
+Make sure you set the right variables in the script.
 
 ```
 ./compile.sh
