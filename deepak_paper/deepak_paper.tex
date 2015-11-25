@@ -4,6 +4,8 @@
 \usepackage{fontspec}
 \usepackage{array}
 \usepackage{psvectorian}
+\usepackage{enumitem}
+\usepackage{csvsimple}
 \usepackage{multicol}
 \usepackage{bidi}
 
@@ -68,16 +70,22 @@
 \end{center}
 
 \fontsize{12pt}{12pt}\linespread{2.5}\notourdu
-  اس کتابچہ میں اردو سیکھنے کے لئے کچھ وسائل مشتمل ہیں۔ یہ کتابچہ خاص طور پر اُن کو نزر میں رکھ کر بنای گئی ہے جو  اردو رسم الخط کو پڑھنا سیکھ گئے ہیں اور اب کچھ مشق کرنا چاہتے ہیں۔ اِس کتابچہ کے ابواب اور اُنکی مختصر تفصیل مندرجہ ذیل ہے۔
+  اس کتابچہ میں اردو سیکھنے کے لئے کچھ وسائل مشتمل ہیں۔ یہ کتابچہ خاص طور پر اُن کو نظر میں رکھ کر بنای گئی ہے جو  اردو رسم الخط کو پڑھنا سیکھ گئے ہیں اور اب مشق کرنا چاہتے ہیں۔ اِس کتابچہ کے ابواب اور اُنکی مختصر تفصیل مندرجہ ذیل ہے۔
 
 ۱) ہندی اور اردو میں کچھ الفاظ:  تلفّظ کے حساب سے اردو کے وہ الفاظ جن کو لکھنے میں نوآموز طلبہ و طالبات کو پریشانی
 
-۲) اردو واھد جمع: واھد جمع کو ہندی میں
+۲) اردو واحد جمع: واحد جمع کو ہندی میں
 {\itfhindi एकवचन-बहुवचन}
 اور انگریزی میں
-{\baskerville Singular-Plural} کہتے ھیں۔
+{\baskerville Singular-Plural}
+بھی کہتے ہیں۔
 
-۳) کچھ اردو الفاظ اور ا ُنکے معنی
+۳) کچھ اردو الفاظ اور ا ُنکے معنی: اردو کے قریبن ۲۰۰ الفاظ اور اُنکے ہندی میں معنی۔
+
+امید کی جاتی ہے کہ یہ کتابچہ اردو  سیکھنے والوں کے 
+لئے فائدہ مند ثابت ہوگی۔
+
+– دیپک جویس
 \clearpage
 \begin{center}
 \fontsize{36pt}{18pt}{\titlefont ۱ – ہندی اور اردو میں کچھ الفاظ}
@@ -157,7 +165,7 @@
 \clearpage
 \setRTL
 \begin{center}
-{\fontsize{36pt}{18pt}\titlefont ۲ – اردو واھد جمع}
+{\fontsize{36pt}{18pt}\titlefont ۲ – اردو واحد جمع}
 \end{center}
 
 \RTLmulticolcolumns
@@ -486,5 +494,18 @@
 \begin{center}
 {\fontsize{36pt}{18pt}\titlefont ۳ – کچھ اردو الفاظ اور اُنکے معنی}
 \end{center}
-
+\fontsize{12pt}{12pt}\linespread{1.2}\itfhindi
+\newcommand{\seturdulabel}[1]{\item[\RLE{\notourdu #1}]\hfill\\}
+\setLTR
+\RTLmulticolcolumns
+\begin{multicols}{3}
+\setlist[description]{font=\normalfont}
+\begin{description}[listparindent=0pt,leftmargin=0pt]
+\csvreader[head=false,separator=tab]{meanings.txt}{1=\word,2=\meaning}%
+{%
+\seturdulabel{\word}
+\meaning
+}%
+\end{description}
+\end{multicols}
 \end{document}
