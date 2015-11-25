@@ -1,0 +1,27 @@
+\documentclass[a4paper]{article}
+
+\usepackage{fontspec}
+\usepackage{csvsimple}
+\usepackage[centering,margin=1in]{geometry}
+\usepackage{enumitem}
+\usepackage{multicol}
+\usepackage{bidi}
+
+\newfontfamily\notourdu[Script=Arabic,Language=Urdu]{Noto Nastaliq Urdu}
+\newfontfamily\itfhindi[Script=Devanagari,Language=Hindi]{ITF Devanagari}
+\newfontfamily\baskerville{Baskerville}
+\newcommand{\seturdulabel}[1]{\item[\RLE{\notourdu #1}]\hfill\\}
+
+\begin{document}
+\itfhindi
+\begin{multicols}{3}
+\setlist[description]{font=\normalfont}
+\begin{description}
+\csvreader[head=false,separator=tab]{urdu_word_meanings.txt}{1=\word,2=\meaning}%
+{%
+\seturdulabel{\word}
+\meaning
+}%
+\end{description}
+\end{multicols}
+\end{document}
