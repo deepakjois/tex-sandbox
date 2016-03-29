@@ -16,21 +16,21 @@ The caste system has its origins in the fourfold Varna system, first mentioned a
 
 Over time, this division transformed into a far more complex system consisting of thousands of graded, endogamous groups. The ideology underlying this division, which could be called ‘Brahmanism’, was perpetuated, enforced and reinforced in society through violence and coercion by the most powerful castes, with the ideological support of Hindu religious scriptures which never fail to emphasise the importance of maintaining caste order and following one’s (caste) ‘dharma’. (Riddles of Hinduism, Debrahmanising History) This religious discourse formed the ideological basis for a society in which the lower castes were kept in slavery-like bondage and assigned varying levels of “pollutedness”, which was seen as justification for the brutal forms of discrimination and oppression they were subjected to.
 
-These caste groups eventually evolved into "watertight compartments” (Ambedkar) of occupation-based communities. So much so, that in India the words commonly used by many people to refer to professionals such as goldsmiths (called Sonar in Hindi, for example), barbers (Nai), grocers (Bania), washermen (Dhobi), carpenters (Badhai), gardeners (Mali), shoemakers (Mochi),  etc. are actually names of individual castes whose members have been engaged in those professions for countless generations. 
+These caste groups eventually evolved into "watertight compartments” (Ambedkar) of occupation-based communities. So much so, that in India the words commonly used by many people to refer to professionals such as goldsmiths (called Sonar in Hindi, for example), barbers (Nai), grocers (Bania), washermen (Dhobi), carpenters (Badhai), gardeners (Mali), shoemakers (Mochi),  etc. are actually names of individual castes whose members have been engaged in those professions for countless generations.
 
 As a result of the imposition of this system, the vast majority of people falling within the caste order have lacked any kind of social or economic mobility for a period of close to two thousand years. Caste has become so ingrained in the Indian psyche that caste-divisions have continued to persist, albeit in a weakened form, even when large sections of people have adopted new religions such as Islam and Christianity.
 
 ### Caste in Transition
 
-There have, of course, been many transformations in the traditional system over the course of history. Many profound changes have occurred in recent times, which have challenged the hegemony of the upper-castes. 
+There have, of course, been many transformations in the traditional system over the course of history. Many profound changes have occurred in recent times, which have challenged the hegemony of the upper-castes.
 
-Constitutionally mandated reservations in educational and administrative public institutions, which were brought into force at after independence, have allowed a small but significant section of Scheduled Castes (SC, a constitutional term roughly equivalent to the category of Dalit), Scheduled Tribes (ST, official term for India’s indigenous people, also known as Adivasis) and more recently, the Other Backward Classes (OBC, official term roughly equivalent to the category of Shudra) to acquire higher education and high and medium level government jobs, which has created a new dalit-bahujan middle class. 
+Constitutionally mandated reservations in educational and administrative public institutions, which were brought into force at after independence, have allowed a small but significant section of Scheduled Castes (SC, a constitutional term roughly equivalent to the category of Dalit), Scheduled Tribes (ST, official term for India’s indigenous people, also known as Adivasis) and more recently, the Other Backward Classes (OBC, official term roughly equivalent to the category of Shudra) to acquire higher education and high and medium level government jobs, which has created a new dalit-bahujan middle class.
 
-The political mobilisation of the lower castes which began in the colonial period has only gained strength in independent India. Dalit-bahujan political parties have found remarkable success in many parts of the country, and have successfully challenged upper-caste hegemony. Political reservations, as well as the large population of lower-castes, ensure that no political party can afford to completely disregard their interests. 
+The political mobilisation of the lower castes which began in the colonial period has only gained strength in independent India. Dalit-bahujan political parties have found remarkable success in many parts of the country, and have successfully challenged upper-caste hegemony. Political reservations, as well as the large population of lower-castes, ensure that no political party can afford to completely disregard their interests.
 
 The introduction of modern economic regulations and policies in the British period, carried forward by the government in independent India have brought about structural changes in the Indian economy, which have to an extent diluted the monopoly of a very small set of castes on trade and business. The opening up of the Indian economy to the international market in the mid 1980s has accelerated this process.
 
-Industrialisation, urbanisation and technological progress have produced new kinds of jobs and modified existing ones. These have created opportunities for urban migration, which has allowed many lower-caste people to escape the oppressive social order of their villages and move to towns and cities, where they are able to live with relatively greater dignity and freedom. 
+Industrialisation, urbanisation and technological progress have produced new kinds of jobs and modified existing ones. These have created opportunities for urban migration, which has allowed many lower-caste people to escape the oppressive social order of their villages and move to towns and cities, where they are able to live with relatively greater dignity and freedom.
 
 In spite of these changes, economic data from India suggests that the underlying patterns of educational achievement, employment, land and asset ownership and standards of living in Indian society continue to be determined by caste. It is a well established fact that the opportunities afforded to an individual for educational, economic and political advancement in Indian society still depend to a very large extent on the caste into which they are born. (Thorat)
 
@@ -40,9 +40,9 @@ The caste system obviously has far-reaching economic consequences. In the words 
 
 >“Caste System is not merely division of labour. It is also a division of labourers…[it] is an hierarchy in which the divisions of labourers are graded one above the other...As an economic organization caste is... a harmful institution, inasmuch as, it involves the subordination of man's natural powers and inclinations to the exigencies of social rules.”
 
-Caste undermines any possibility of achieving efficiency and optimality in economic processes as it disrupts the forces which push an economic system in such a direction. Its imposition of occupation based on birth restricts access to different modes of living and means of livelihood, often forcing people into jobs they have no inclination for, or compelling them to stay unemployed rather than take up occupations not compatible with their caste. (Ambedkar) 
+Caste undermines any possibility of achieving efficiency and optimality in economic processes as it disrupts the forces which push an economic system in such a direction. Its imposition of occupation based on birth restricts access to different modes of living and means of livelihood, often forcing people into jobs they have no inclination for, or compelling them to stay unemployed rather than take up occupations not compatible with their caste. (Ambedkar)
 
-Caste also divides people into antagonistic groups, foreclosing the possibility of solidarity across the lines of class or gender. It is, therefore, believed by many to be largely responsible for the startling levels of poverty and deprivation in India, which are completely out of proportion to the economic resources and capacity of the Indian state. 
+Caste also divides people into antagonistic groups, foreclosing the possibility of solidarity across the lines of class or gender. It is, therefore, believed by many to be largely responsible for the startling levels of poverty and deprivation in India, which are completely out of proportion to the economic resources and capacity of the Indian state.
 
 ## A Brief Overview of the Indian Retail Economy
 
@@ -50,9 +50,9 @@ Caste also divides people into antagonistic groups, foreclosing the possibility 
 
 Retail is defined as the sale of goods and services directly to consumers. Retail trade may be contrasted with wholesale trade, which is the sale of goods in bulk for retail or other commercial purposes. Important retail categories include food and beverages, clothing, healthcare, jewellery, electronics and electrical appliances, and personal care products.
 
-In India, the retail market is one of the biggest sectors of the economy in terms of its economic value, and generates about 10% of India’s gross domestic product and 8% of the employment. There are estimated to be 12 to 15 million retail outlets in India, and only 4% of them are larger than 500 square feet in size. About 92% of all retailing in India happens in the unorganised sector, through unregistered small shops and vendors. (KPMG) 
+In India, the retail market is one of the biggest sectors of the economy in terms of its economic value, and generates about 10% of India’s gross domestic product and 8% of the employment. There are estimated to be 12 to 15 million retail outlets in India, and only 4% of them are larger than 500 square feet in size. About 92% of all retailing in India happens in the unorganised sector, through unregistered small shops and vendors. (KPMG)
 
-The most common retail outlet for the purchase of daily groceries in India is still the small owner-manned kirana shop, though in recent times, large convenience and grocery store chains have also started to emerge as popular outlets among the more affluent residents of bigger cities. 
+The most common retail outlet for the purchase of daily groceries in India is still the small owner-manned kirana shop, though in recent times, large convenience and grocery store chains have also started to emerge as popular outlets among the more affluent residents of bigger cities.
 
 (http://indiainbusiness.nic.in/newdesign/index.php?param=industryservices_landing/383/3)
 https://www.kpmg.com/IN/en/IssuesAndInsights/ArticlesPublications/Documents/BBG-Retail.pdf
@@ -73,7 +73,7 @@ Chandra Bhan Prasad and Milind Kamble, in an article written in support of forei
 
 (http://timesofindia.indiatimes.com/edit-page/To-empower-dalits-do-away-with-Indias-antiquated-retail-trading-system/articleshow/17482382.cms)
 
-Not surprisingly, in India’s present day capitalist class - which has grown from strength to strength since the advent of neoliberalism - the richest and most powerful groups are invariably from the mercantile castes. For example, the 10 richest people in India, according to Forbes magazine are: Lakshmi Mittal (Baniya), Mukesh Ambani (Baniya), Azim Premji (Lohana), Ruia brothers (Baniya), Savitri Jindal (Baniya), Gautam Adani (Baniya), K.M. Birla (Baniya), Anil Ambani (Baniya), Sunil Mittal (Baniya), Adi Godrej (Parsi). (Aakar Patel, http://www.thehindu.com/todays-paper/tp-opinion/why-caste-persists-in-politics/article2940080.ece). 
+Not surprisingly, in India’s present day capitalist class - which has grown from strength to strength since the advent of neoliberalism - the richest and most powerful groups are invariably from the mercantile castes. For example, the 10 richest people in India, according to Forbes magazine are: Lakshmi Mittal (Baniya), Mukesh Ambani (Baniya), Azim Premji (Lohana), Ruia brothers (Baniya), Savitri Jindal (Baniya), Gautam Adani (Baniya), K.M. Birla (Baniya), Anil Ambani (Baniya), Sunil Mittal (Baniya), Adi Godrej (Parsi). (Aakar Patel, http://www.thehindu.com/todays-paper/tp-opinion/why-caste-persists-in-politics/article2940080.ece).
 
 About 75% of all people appointed to the post of president of the Federation of Indian Chambers of Commerce and Industry, the largest and oldest apex business organisation in India, since it was founded in 1927, belong to mercantile castes, while over 85% are upper-caste Hindus. (http://ficci.in/about-Past-President.asp)
 
@@ -81,7 +81,7 @@ The persistence of casteist attitudes and relationships bolsters the authority a
 
 ## Purpose of this Study
 
-This study aims to shed light on the role played by caste in the functioning of India’s retail economy. It looks at some historical and sociological dimensions of the evolution and structure of India’s markets and demonstrates how the caste system remains a pervasive force in the Indian retail sector. It also considers the role affirmative action can play in the creation of a more equitable and diverse retail market, by looking at the effects of such policies in other countries 
+This study aims to shed light on the role played by caste in the functioning of India’s retail economy. It looks at some historical and sociological dimensions of the evolution and structure of India’s markets and demonstrates how the caste system remains a pervasive force in the Indian retail sector. It also considers the role affirmative action can play in the creation of a more equitable and diverse retail market, by looking at the effects of such policies in other countries
 
 ## Literature Review
 
@@ -89,7 +89,7 @@ Many historians and economists have documented the past and present of India’s
 
 Harish Damodaran’s book ‘India’s New Capitalists’ traces the history of India’s trading castes, along with the trajectories of the newly emerging entrepreneurial communities, from the colonial period to the present day. Due to its focus on the histories of specific caste groups, it often brings to light the vital role caste-capital plays in ensuring success in business, and is an important source of information for this project.
 
-Barbara Harriss-White et al in their book ‘Dalits and Adivasis in India’s Business Economy’ present an extensive analysis of the disproportionately low participation rates of these two groups in different spheres of the Indian economy over the last three decades, using data from the economic censuses. They also investigate the factors which prevent dalits and adivasis from undertaking private enterprise. 
+Barbara Harriss-White et al in their book ‘Dalits and Adivasis in India’s Business Economy’ present an extensive analysis of the disproportionately low participation rates of these two groups in different spheres of the Indian economy over the last three decades, using data from the economic censuses. They also investigate the factors which prevent dalits and adivasis from undertaking private enterprise.
 
 The well-known economist, journalist and intellectual Chandra Bhan Prasad has done extensive research on the effects of neoliberalism on India’s lower castes, and his two research papers: ‘Markets and Manu: Economic Reforms and its Impact on Caste in India’ and ‘Rethinking Inequality: Dalits in Uttar Pradesh in the Market Reform Era’ present many new insights into how Indian social relationships are being altered in the face of rapid economic change.
 
@@ -117,7 +117,6 @@ My hypotheses regarding the caste composition of a typical Indian bazaar are:
 
 * The Indian retail economy continues to be regulated to a large extent by the rules of caste, with every caste having a designated place and role.
 
- 
 
 
 
@@ -131,5 +130,6 @@ My hypotheses regarding the caste composition of a typical Indian bazaar are:
 
 
 
-	
+
+
 
