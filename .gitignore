@@ -2,3 +2,4 @@
 *.pdf
 *.aux
 scratch.tex
+*.out
