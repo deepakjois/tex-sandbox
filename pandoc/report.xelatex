@@ -1,0 +1,13 @@
+\documentclass[12pt,a4paper,titlepage]{report}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{6pt plus 2pt minus 1pt}
+\setcounter{secnumdepth}{1}
+\begin{document}
+\begin{titlepage}
+This is the title page.
+\end{titlepage}
+\begin{abstract}
+This is the abstract.
+\end{abstract}
+$body$
+\end{document}
