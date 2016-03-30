@@ -1,0 +1,6 @@
+* Makefile
+* Clean XeLaTeX template and add title page and abstract on separate page
+* Abstract using YAML Frontmatter
+* Section Numbering etc
+* Controlling Fonts
+* Hindi Text
