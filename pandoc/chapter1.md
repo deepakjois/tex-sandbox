@@ -1,12 +1,6 @@
-# Caste and the Indian Retail Market
-
-# Abstract
-
-This study aims to shed light on the role played by caste in the functioning of India’s retail economy. It looks at some historical and sociological dimensions of the evolution and structure of India’s markets and demonstrates how, in spite of the apparently modern and secular economic policies of the Indian government, caste hierarchies persist in the retail marketplace, with the traditional trading castes still forming the most wealthy and powerful group. It makes use of business ownership data from the Indian Economic Census, 2005 and sample surveys conducted in two small bazaars, along with several recent economic and sociological studies, to reach conclusions about how the caste system remains a pervasive force in the Indian retail sector. It also considers the role affirmative action can play in the creation of a more equitable and diverse retail market, by looking at the effects of such policies in other countries .
-
 # Introduction
 
-## A Brief Overview of India’s Caste System
+## Brief Overview of India’s Caste System
 
 ### The Origins of Caste
 
@@ -44,7 +38,7 @@ Caste undermines any possibility of achieving efficiency and optimality in econo
 
 Caste also divides people into antagonistic groups, foreclosing the possibility of solidarity across the lines of class or gender. It is, therefore, believed by many to be largely responsible for the startling levels of poverty and deprivation in India, which are completely out of proportion to the economic resources and capacity of the Indian state.
 
-## A Brief Overview of the Indian Retail Economy
+## Brief Overview of the India’s Retail Economy
 
 ### India’s Retail Economy
 
