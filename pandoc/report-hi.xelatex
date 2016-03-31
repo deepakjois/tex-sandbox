@@ -9,11 +9,11 @@
 \setmainlanguage {hindi}
 \setotherlanguage{english}
 
-\newfontfamily\hindifont[Script=Devanagari,UprightFont = *-Light]{Ek Mukta}
+\newfontfamily\hindifont[Script=Devanagari]{Vesper Libre}
 \newfontfamily\englishfont[Script=Latin]{Baskerville}
 
 \usepackage{setspace}
-\setstretch{1.2}
+\setstretch{1.1}
 
 \setlength{\parindent}{0pt}
 \setlength{\parskip}{6pt plus 2pt minus 1pt}
