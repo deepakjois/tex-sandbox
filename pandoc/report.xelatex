@@ -1,4 +1,12 @@
 \documentclass[12pt,a4paper,titlepage]{report}
+
+\usepackage{fontspec}
+\setmainfont{Baskerville}
+
+\usepackage[hyphens]{url}
+\usepackage{hyperref}
+\urlstyle{same}  % don't use monospace font for urls
+
 \setlength{\parindent}{0pt}
 \setlength{\parskip}{6pt plus 2pt minus 1pt}
 \setcounter{secnumdepth}{1}
@@ -8,7 +16,7 @@
 Caste and the Indian Retail Market
 \end{titlepage}
 \begin{abstract}
-This study aims to shed light on the role played by caste in the functioning of India’ retail economy. It looks at some historical and sociological dimensions of the evolution and structure of India’s markets and demonstrates how, in spite of the apparently modern and secular economic policies of the Indian government, caste hierarchies persist in the retail marketplace, with the traditional trading castes still forming the most wealthy and powerful group. It makes use of business ownership data from the Indian Economic Census, 2005 and sample surveys conducted in two small bazaars, along with several recent economic and sociological studies, to reach conclusions about how the caste system remains a pervasive force in the Indian retail sector. It also considers the role affirmative action can play in the creation of a more equitable and diverse retail market, by looking at the effects of such policies in other countries.
+This study aims to shed light on the role played by caste in the functioning of India’s retail economy. It looks at some historical and sociological dimensions of the evolution and structure of India’s markets and demonstrates how, in spite of the apparently modern and secular economic policies of the Indian government, caste hierarchies persist in the retail marketplace, with the traditional trading castes still forming the most wealthy and powerful group. It makes use of business ownership data from the Indian Economic Census, 2005 and sample surveys conducted in two small bazaars, along with several recent economic and sociological studies, to reach conclusions about how the caste system remains a pervasive force in the Indian retail sector. It also considers the role affirmative action can play in the creation of a more equitable and diverse retail market, by looking at the effects of such policies in other countries.
 \end{abstract}
 \tableofcontents
 $body$
