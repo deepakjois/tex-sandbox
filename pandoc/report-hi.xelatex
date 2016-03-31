@@ -1,0 +1,31 @@
+\documentclass[12pt,a4paper,titlepage]{report}
+\usepackage{fontspec}
+
+\usepackage[hyphens]{url}
+\usepackage{hyperref}
+\urlstyle{same}  % don't use monospace font for urls
+
+\usepackage{polyglossia}
+\setmainlanguage {hindi}
+\setotherlanguage{english}
+
+\newfontfamily\hindifont[Script=Devanagari,UprightFont = *-Light]{Ek Mukta}
+\newfontfamily\englishfont[Script=Latin]{Baskerville}
+
+\usepackage{setspace}
+\setstretch{1.2}
+
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{6pt plus 2pt minus 1pt}
+\setcounter{secnumdepth}{1}
+\setcounter{tocdepth}{1}
+\begin{document}
+\begin{titlepage}
+भारतीय खुद्रा बाज़ार में जाति की भूमिका
+\end{titlepage}
+\begin{abstract}
+इस परियोजना कार्य का उद्देश्य है भारतीय खुद्रा बाज़ार में जाति की भूमिका को समझना। इस शोध पत्र में भारत के खुद्रा बाज़ार के ऐतिहासिक विकास और वर्तमान संरचना के कुछ पहलुओं का विश्लेषण पेश किया गया है, और यह दिखाने का प्रयास किया गया है कि हमारी सरकार की तथाकथित आधुनिक और निष्पक्ष आर्थिक नीतियों के बावजूद भारत के बाज़ारों में जाति की पकड़ कायम है। आज भी पारम्परिक रूप से व्यापार करने वाली जातियाँ ही इस क्षेत्र के सबसे धनी और शक्तिशाली वर्ग में आती हैं। इस लेख में भारतीय आर्थिक जनगणना, 2005 के व्यवसाय स्वामित्व संबंधी तथ्य और दो छोटे बाज़ारों में किए गए सर्वेक्षण के द्वारा भारतीय खुद्रा बाज़ार में जाति के व्यापक प्रभाव को सिद्ध करने का प्रयास किया गया है। साथ में, बाज़ार को अधिक विविध और समतावादी बनाने में निजी क्षेत्र में आरक्षण की भूमिका पर विचार प्रस्तुत किए गए हैं।
+\end{abstract}
+\tableofcontents
+$body$
+\end{document}
