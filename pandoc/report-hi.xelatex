@@ -1,22 +1,36 @@
-\documentclass[12pt,a4paper,titlepage]{report}
+\documentclass[12pt,a4paper,titlepage] {report}
 \usepackage{fontspec}
 
+% Hyperlinking
 \usepackage[hyphens]{url}
 \usepackage{hyperref}
 \urlstyle{same}  % don't use monospace font for urls
 
+% Support for Hindi typesetting
 \usepackage{polyglossia}
-\setmainlanguage {hindi}
+\setmainlanguage{hindi}
 \setotherlanguage{english}
 
-\newfontfamily\hindifont[Script=Devanagari]{Vesper Libre}
-\newfontfamily\englishfont[Script=Latin]{Baskerville}
+% Fonts for Hindi and English
+\newfontfamily\hindifont[Script=Devanagari,Ligatures=TeX]{Vesper Libre}
+\newfontfamily\englishfont[Script=Latin,Ligatures=TeX]{Baskerville}
 
+% Devanagari requires a bit more breathing room
 \usepackage{setspace}
 \setstretch{1.1}
 
+% Customizing Abstract title font
+\usepackage{etoolbox}
+\patchcmd{\abstract}
+  {\bfseries\abstractname}
+  {\LARGE\bfseries\abstractname}
+  {}{}
+
+% Tables
+\usepackage{longtable,booktabs}
+
 \setlength{\parindent}{0pt}
-\setlength{\parskip}{6pt plus 2pt minus 1pt}
+\setlength{\parskip}{1em plus .2em minus .1em}
 \setcounter{secnumdepth}{1}
 \setcounter{tocdepth}{1}
 \begin{document}

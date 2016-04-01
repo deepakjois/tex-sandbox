@@ -1,13 +1,9 @@
-.PHONY: pdf tex scratch
+.PHONY: scratch scratch-hi
 
-OPTIONS= --bibliography=bibliography.bib --csl=chicago-author-date.csl --filter pandoc-citeproc --template=report.xelatex --chapters
 
-pdf:
-	pandoc -s $(OPTIONS) --latex-engine=xelatex chapter1.md biblio.md -o chapter1.pdf
-tex:
-	pandoc -s $(OPTIONS) chapter1.md -o chapter1.tex
+OPTIONS = --latex-engine=xelatex --bibliography=scratch.bib  --filter pandoc-citeproc --chapters -s
 scratch:
-	pandoc --latex-engine=xelatex --bibliography=bibliography.bib --csl=chicago-author-date.csl --template=report.xelatex --filter pandoc-citeproc  --chapters -s scratch.md -o scratch.pdf
+	pandoc $(OPTIONS) --template=report.xelatex scratch.md -o scratch.pdf
 scratch-hi:
-	pandoc --latex-engine=xelatex --bibliography=bibliography.bib --csl=chicago-author-date.csl --template=report-hi.xelatex --filter pandoc-citeproc  --chapters -s scratch-hi.md -o scratch-hi.pdf
+	pandoc $(OPTIONS) --template=report-hi.xelatex scratch-hi.md -o scratch-hi.pdf
 
