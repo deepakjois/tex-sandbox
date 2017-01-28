@@ -68,11 +68,5 @@ end)
 callback.register("pre_output_filter", function(head)
    texio.write_nl("PRE OUTPUT")
    show_nodes(head)
+   return head
 end)
-
-
-
---local text = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
-tex.parindent = "0pt"
-print(string.format("\nTRACING VAR: %d\n", tex.tracingoutput))
--- tex.sprint(text)
