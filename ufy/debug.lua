@@ -13,31 +13,6 @@ local function dump_node(n)
   return dump_fields(n, node.fields(n.id))
 end
 
--- Switch off some callbacks
-callback.register("hyphenate", false)
-callback.register("ligaturing", false)
-callback.register("kerning", false)
-
--- Add debug statements to some callbacks
--- callback.register("post_linebreak_filter", function()
---   texio.write_nl("POST_LINEBREAK")
---   return true
--- end)
---
--- callback.register("hpack_filter", function()
---   texio.write_nl("HPACK")
---   return true
--- end)
---
--- callback.register("vpack_filter", function()
---   texio.write_nl("VPACK")
---   return true
--- end)
-
-callback.register("buildpage_filter", function(extrainfo)
-   texio.write_nl("BUILDPAGE_FILTER "..extrainfo)
-end)
-
 
 -- Print the contents of a nodelist.
 -- Glyph nodes are printed as UTF-8 characters, while other nodes are printed
@@ -58,15 +33,20 @@ local function show_nodes (head, raw)
   return true
 end
 
--- Register debug callback
-callback.register("pre_linebreak_filter", function(head)
-  texio.write_nl("PRE_LINEBREAK")
+
+callback.register("hyphenate", false)
+callback.register("ligaturing", false)
+callback.register("kerning", false)
+
+
+
+
+callback.register("post_linebreak_filter", function(head)
+  texio.write_nl("POST LINE BREAK")
   show_nodes(head)
-  return head
+  return true
 end)
 
-callback.register("pre_output_filter", function(head)
-   texio.write_nl("PRE OUTPUT")
-   show_nodes(head)
-   return head
-end)
+return {
+  show_nodes = show_nodes
+}
