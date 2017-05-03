@@ -57,14 +57,14 @@ local function bidi_reorder_nodes(head)
   local pair_types = bidi.codepoints_to_pair_types(codes)
   local pair_values = bidi.codepoints_to_pair_values(codes)
 
-  texio.write_nl("term and log", string.format("Paragraph Direction: %s\n", h.dir))
+  debug.log("Paragraph Direction: %s\n", h.dir)
   local dir
   if h.dir == "TRT" then
     dir = 1
   elseif h.dir == "TLT" then
     dir = 0
   else
-    texio.write_nl("term and log", string.format("Paragraph direction %s unsupported. Bailing!\n", h.dir))
+    debug.log("Paragraph direction %s unsupported. Bailing!\n", h.dir)
     return true
   end
 
@@ -130,7 +130,7 @@ local function shape_run(head,dir)
 
   buf:set_cluster_level(harfbuzz.Buffer.HB_BUFFER_CLUSTER_LEVEL_CHARACTERS)
   buf:add_codepoints(codepoints)
-  harfbuzz.shape(hb_font,buf, { direction = lt_to_hb_dir[dir] })
+  harfbuzz.shape(hb_font,buf, { direction = lt_to_hb_dir[dir]})
 
   -- Create new nodes from shaped text
   if dir == 'TRT' then buf:reverse() end
@@ -229,7 +229,7 @@ local function shape_runs(head)
 end
 
 callback.register("pre_linebreak_filter", function(head)
-  texio.write_nl("PRE LINE BREAK")
+  debug.log("PRE LINE BREAK")
   debug.show_nodes(head)
 
   -- Apply Unicode BiDi algorithm on nodes

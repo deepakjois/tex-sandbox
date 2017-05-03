@@ -33,8 +33,18 @@ local function show_nodes (head, raw)
   return true
 end
 
-
+local function log(...)
+  local arg = {...}
+  if #arg == 1 then
+    texio.write_nl("term and log",arg[1])
+  else
+    local fmt = arg[1]
+    table.remove(arg,1)
+    texio.write_nl("term and log", string.format(fmt, table.unpack(arg)))
+  end
+end
 
 return {
-  show_nodes = show_nodes
+  show_nodes = show_nodes,
+  log = log
 }
