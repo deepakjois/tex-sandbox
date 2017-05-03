@@ -34,18 +34,6 @@ local function show_nodes (head, raw)
 end
 
 
-callback.register("hyphenate", false)
-callback.register("ligaturing", false)
-callback.register("kerning", false)
-
-
-
-
-callback.register("post_linebreak_filter", function(head)
-  texio.write_nl("POST LINE BREAK")
-  show_nodes(head)
-  return true
-end)
 
 return {
   show_nodes = show_nodes
