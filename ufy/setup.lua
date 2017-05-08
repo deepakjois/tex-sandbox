@@ -106,6 +106,153 @@ local function upem_to_sp(v,metrics)
   return math.floor(v / metrics.units_per_em * metrics.size)
 end
 
+-- Convert a node list to a table for easier processing. Returns a table
+-- containing entries for all nodes in the order they appear in the list. Each
+-- entry contains the following fields:
+--
+-- * The node corresponding to the position in the table
+--
+-- * The character corresponding to the node
+--
+--   - Glyph nodes are stored as their corresponding character codepoints
+--
+--   - Glue nodes of subtype 13 (spaceskip) are stored as 0x20 whitespace character
+--     (FIXME what about other types of space-like glue inserted when using \quad etc)
+--
+--    - All other nodes are stored as 0xFFFC (OBJECT REPLACEMENT CHARACTER)
+--
+--  * A script identifier for each node.
+--
+local function nodelist_to_table(head)
+  -- Build text
+  local nodetable = {}
+  for n in node.traverse(head) do
+    local item = {}
+    item.node = n
+    table.insert(nodetable,n)
+    if n.id == node.id("glyph") then -- regular char node
+      item.char = n.char
+      item.script = harfbuzz.unicode.script(item.char)
+    elseif n.id == node.id("glue") and n.subtype == 13 then -- space skip
+      item.char = 0x0020
+      item.script = harfbuzz.unicode.script(item.char)
+    else
+      item.char = 0xfffc
+    end
+  end
+
+  return nodetable
+end
+
+-- FIXME use BiDi properties (via UCDN) to determine whether characters are paired
+-- or not.
+local paired_chars = {
+  0x0028, 0x0029, /* ascii paired punctuation */
+  0x003c, 0x003e,
+  0x005b, 0x005d,
+  0x007b, 0x007d,
+  0x00ab, 0x00bb, /* guillemets */
+  0x2018, 0x2019, /* general punctuation */
+  0x201c, 0x201d,
+  0x2039, 0x203a,
+  0x3008, 0x3009, /* chinese paired punctuation */
+  0x300a, 0x300b,
+  0x300c, 0x300d,
+  0x300e, 0x300f,
+  0x3010, 0x3011,
+  0x3014, 0x3015,
+  0x3016, 0x3017,
+  0x3018, 0x3019,
+  0x301a, 0x301b
+}
+
+local function get_pair_index(char)
+  local lower = 1
+  local upper = #paired_chars
+
+  while (lower <= upper) do
+    local mid = math.floor((lower + upper) / 2)
+    if char < paired_chars[mid] then
+      upper = mid - 1
+    elseif char > paired_chars[mid] then
+      lower = mid + 1
+    else
+      return mid
+    end
+
+  return 0
+end
+
+local function is_open(pair_index)
+  return bit32.band(pair_index, 1) == 1 -- odd index is open
+end
+
+-- Resolve the script for each character in the node table.
+--
+-- If the character script is common or inherited it takes the script of the
+-- character before it except paired characters which we try to make them use
+-- the same script.
+local function resolve_scripts(nodetable)
+  local last_script_index = 0
+  local last_set_index = 0
+  local last_script_value = harfbuzz.HB_SCRIPT_INVALID
+  local stack = { top = 0 }
+
+  for i,v in ipairs(nodetable) do
+    if v.script == harfbuzz.HB_SCRIPT_COMMON and last_script_index ~= 0 then
+      local pair_index = get_pair_index(v.char)
+      if pair_index > 0 then
+        if is_open(pair_index) then -- paired character (open)
+          v.script = last_script_value
+          last_set_index = i
+          stack.top = stack.top + 1
+          stack[stack.top] = { script = v.script, pair_index = pair_index}
+        else -- is a close paired character */
+          -- find matching opening (by getting the last odd index for current
+          -- even index)
+          local pi = pair_index - 1
+          while stack.top > 0 and stack[stack.top].pair_index != pi do
+            stack.top = stack.top - 1
+          end
+
+          if stack.top > 0 then
+            v.script = stack[stack.top].script
+            last_script_value = v.script
+            last_set_index = i
+          else
+            v.script = last_script_value
+            last_set_index = i
+          end
+        end
+      else
+        nodetable[i].script = last_script_value
+        last_set_index = i
+      end
+    elseif v.script == harfbuzz.HB_SCRIPT_INHERITED and last_script_index ~= 0 then
+      v.script = last_script_value
+      last_set_index = i
+    else
+      for j = last_set_index + 1, i do nodetable[j].script = nodetable[i].script end
+      last_script_value = nodetable[i].script
+      last_script_index = i
+      last_set_index = i
+    end
+  end
+end
+
+local function shape_nodes(head, dir)
+  -- Convert node list to table
+  nodetable = nodelist_to_table(head)
+
+  -- Resolve scripts
+  resolve_scripts(nodetable)
+
+  -- Reorder Runs
+  -- Break up runs further if required
+  -- Do shaping
+  -- Convert shaped nodes to node list
+end
+
 local function shape_run(head,dir)
   local fnt = head.font
   local metrics = font.getfont(fnt)
@@ -228,15 +375,21 @@ local function shape_runs(head)
   end
 end
 
-callback.register("pre_linebreak_filter", function(head)
-  debug.log("PRE LINE BREAK")
-  debug.show_nodes(head)
+callback.register("pre_linebreak_filter", function(head, groupcode)
+  debug.log("PRE LINE BREAK. Group Code is %s", groupcode == "" and "main vertical list" or groupcode)
+  -- debug.show_nodes(head)
 
   -- Apply Unicode BiDi algorithm on nodes
   bidi_reorder_nodes(head)
 
   shape_runs(head)
 
+  return true
+end)
+
+callback.register("hpack_filter", function(head, groupcode)
+  debug.log("HPACK_FILTER. Group Code is %s", groupcode == "" and "main vertical list" or groupcode)
+  debug.show_nodes(head)
   return true
 end)
 
