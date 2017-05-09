@@ -26,80 +26,6 @@ end
 -- Register OpenType font loader in define_font callback.
 callback.register('define_font', read_font, "font loader")
 
--- Reorder paragraph nodes according to Unicode BiDi algorithm.
-local function bidi_reorder_nodes(head)
-  local h,t,nodes, codes
-  nodes = {}
-  codes = {}
-
-  h = head
-  assert(h.id == node.id("local_par"))
-
-  table.insert(nodes,h)
-  table.insert(codes,0xfffc)
-  for n in node.traverse(h) do
-    table.insert(nodes,n)
-    if n.id == node.id("glyph") then -- regular char node
-      table.insert(codes, n.char)
-    elseif n.id == node.id("glue") and n.subtype == 13 then -- space skip
-      table.insert(codes,0x0020)
-    else
-      -- TODO need additional checks to recursively reorder other
-      -- kinds of nodes.
-      table.insert(codes,0xfffc)
-    end
-    t = n
-  end
-
-  assert(t.id == node.id("glue") and t.subtype == 15)
-
-  local types = bidi.codepoints_to_types(codes)
-  local pair_types = bidi.codepoints_to_pair_types(codes)
-  local pair_values = bidi.codepoints_to_pair_values(codes)
-
-  debug.log("Paragraph Direction: %s\n", h.dir)
-  local dir
-  if h.dir == "TRT" then
-    dir = 1
-  elseif h.dir == "TLT" then
-    dir = 0
-  else
-    debug.log("Paragraph direction %s unsupported. Bailing!\n", h.dir)
-    return true
-  end
-
-  local para = bidi.Paragraph.new(types, pair_types, pair_values, dir)
-
-  local linebreaks = { #codes + 1 }
-  local reordering = para:getReordering(linebreaks)
-
-  local reordered = {}
-
-  for i,v in ipairs(reordering) do
-    reordered[i] = nodes[v]
-  end
-
-  if dir == 0 then
-    assert(h == reordered[1])
-    assert(t == reordered[#reordered])
-    h = reordered[1]
-    for i = 2, #reordered do
-      h.next = reordered[i]
-      reordered[i].prev = h
-      h = reordered[i]
-    end
-  else
-    assert(h == reordered[#reordered])
-    assert(t == reordered[1])
-    h = reordered[#reordered]
-    for i = #reordered - 1, 1, -1 do
-      h.next = reordered[i]
-      reordered[i].prev = h
-      h = reordered[i]
-    end
-  end
-end
-
 local lt_to_hb_dir = { TLT = "ltr", TRT = "rtl" }
 
 local function upem_to_sp(v,metrics)
@@ -126,6 +52,7 @@ end
 local function nodelist_to_table(head)
   -- Build text
   local nodetable = {}
+  local last_font = nil
   for n in node.traverse(head) do
     local item = {}
     item.node = n
@@ -133,9 +60,13 @@ local function nodelist_to_table(head)
     if n.id == node.id("glyph") then -- regular char node
       item.char = n.char
       item.script = harfbuzz.unicode.script(item.char)
+      item.font = n.font
+      last_font = item.font
     elseif n.id == node.id("glue") and n.subtype == 13 then -- space skip
       item.char = 0x0020
       item.script = harfbuzz.unicode.script(item.char)
+      if last_font == nil then error("cannot determine font for spaceskip") end
+      item.font = last_font
     else
       item.char = 0xfffc
     end
@@ -207,7 +138,7 @@ local function resolve_scripts(nodetable)
           last_set_index = i
           stack.top = stack.top + 1
           stack[stack.top] = { script = v.script, pair_index = pair_index}
-        else -- is a close paired character */
+        else -- is a close paired character
           -- find matching opening (by getting the last odd index for current
           -- even index)
           local pi = pair_index - 1
@@ -232,12 +163,101 @@ local function resolve_scripts(nodetable)
       v.script = last_script_value
       last_set_index = i
     else
-      for j = last_set_index + 1, i do nodetable[j].script = nodetable[i].script end
-      last_script_value = nodetable[i].script
+      for j = last_set_index + 1, i do nodetable[j].script = v.script end
+      last_script_value = v.script
       last_script_index = i
       last_set_index = i
     end
   end
+end
+
+local function reverse_runs(runs, start, len)
+  for i = 1, math.floor(len/2) do
+    local temp = runs[start + i - 1]
+    runs[start + i - 1] = runs[start + len - i]
+    runs[start + len - i] = temp
+  end
+end
+
+-- Apply the Unicode BiDi algorithm, segment the nodes into runs, and reorder the runs.
+--
+-- Returns a table containing the runs after reordering.
+--
+local function bidi_reordered_runs(nodetable, base_dir)
+  local codepoints = {}
+  for _,v in ipairs(nodetable) do
+    table.insert(codepoints, v.char)
+  end
+  local types = bidi.codepoints_to_types(codepoints)
+  local pair_types = bidi.codepoints_to_pair_types(codepoints)
+  local pair_values = bidi.codepoints_to_pair_values(codepoints)
+
+  debug.log("Paragraph Direction: %s\n", h.dir)
+  local dir
+  if h.dir == "TRT" then
+    dir = 1
+  elseif h.dir == "TLT" then
+    dir = 0
+  else
+    -- FIXME handle this better, and don’t throw an error.
+    debug.log("Paragraph direction %s unsupported. Bailing!\n", h.dir)
+    error("Unsupported Paragraph Direction")
+  end
+
+  local para = bidi.Paragraph.new(types, pair_types, pair_values, dir)
+
+  local linebreaks = { #codes + 1 }
+  local levels = para:getLevels(linebreaks)
+
+  -- FIXME handle embedded RLE, LRE, RLI, LRI and PDF characters at this point and remove them.
+
+  if #levels = 0 then return runs end
+
+  -- L1. Reset the embedding level of the following characters to the paragraph embedding level:
+  -- …<snip>…
+  --   4. Any sequence of whitespace characters …<snip>… at the end of the line.
+  -- …<snip>…
+  for i = #levels, 1, -1 do
+    levels[i] = base_dir
+  end
+
+  local max_level = 0
+  local min_odd_level = bidi.MAX_DEPTH + 2
+  for i,l in ipairs(levels) do
+    if l > max_level then max_level = l end
+    if bit32.band(l, 1) ~= 0 and l < min_odd_level then min_odd_level = l end
+  end
+
+  local runs = {}
+  local run_start = 1
+  local run_index = 1
+  while run_start <= #levels do
+    local run_end = run_start
+    while run_end <= #levels and levels[run_start] == levels[run_end] do run_end = run_end + 1 end
+    local run = {}
+    run.pos = run_start
+    run.level = levels[run_start]
+    run.len = run_end - run_start
+    runs[run_index] = run
+    run_index = run_index + 1
+    run_start = run_end
+  end
+
+  -- L2. From the highest level found in the text to the lowest odd level on
+  -- each line, including intermediate levels not actually present in the text,
+  -- reverse any contiguous sequence of characters that are at that level or
+  -- higher.
+  for l = max_level, min_odd_level, -1 do
+    local i = #runs
+    while i > 0 do
+      local e = i
+      i = i - 1
+      while i > 0 and runs[i].level >= l do i = i - 1 end
+      reverse_runs(runs, i+1, e - i)
+    end
+  end
+
+  return runs
 end
 
 local function shape_nodes(head, dir)
@@ -248,7 +268,10 @@ local function shape_nodes(head, dir)
   resolve_scripts(nodetable)
 
   -- Reorder Runs
+  local runs = bidi_reordered_runs(nodetable, dir)
+
   -- Break up runs further if required
+  
   -- Do shaping
   -- Convert shaped nodes to node list
 end
