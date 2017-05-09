@@ -65,7 +65,6 @@ local function nodelist_to_table(head)
     elseif n.id == node.id("glue") and n.subtype == 13 then -- space skip
       item.char = 0x0020
       item.script = harfbuzz.unicode.script(item.char)
-      if last_font == nil then error("cannot determine font for spaceskip") end
       item.font = last_font
     else
       item.char = 0xfffc
@@ -192,19 +191,7 @@ local function bidi_reordered_runs(nodetable, base_dir)
   local pair_types = bidi.codepoints_to_pair_types(codepoints)
   local pair_values = bidi.codepoints_to_pair_values(codepoints)
 
-  debug.log("Paragraph Direction: %s\n", h.dir)
-  local dir
-  if h.dir == "TRT" then
-    dir = 1
-  elseif h.dir == "TLT" then
-    dir = 0
-  else
-    -- FIXME handle this better, and don’t throw an error.
-    debug.log("Paragraph direction %s unsupported. Bailing!\n", h.dir)
-    error("Unsupported Paragraph Direction")
-  end
-
-  local para = bidi.Paragraph.new(types, pair_types, pair_values, dir)
+  local para = bidi.Paragraph.new(types, pair_types, pair_values, base_dir)
 
   local linebreaks = { #codes + 1 }
   local levels = para:getLevels(linebreaks)
@@ -217,8 +204,12 @@ local function bidi_reordered_runs(nodetable, base_dir)
   -- …<snip>…
   --   4. Any sequence of whitespace characters …<snip>… at the end of the line.
   -- …<snip>…
-  for i = #levels, 1, -1 do
-    levels[i] = base_dir
+  do
+    local i = #levels
+    while i > 0 and (types[i] == ucdn.UCDN_BIDI_CLASS_BN or types[i] == ucdn.UCDN_BIDI_CLASS_WS)  do
+      levels[i] = base_dir
+      i = i - 1
+    end
   end
 
   local max_level = 0
@@ -260,19 +251,111 @@ local function bidi_reordered_runs(nodetable, base_dir)
   return runs
 end
 
-local function shape_nodes(head, dir)
+-- FIXME handle vertical directions as well.
+local function hb_dir(base_dir, level)
+  local dir = harfbuzz.HB_DIRECTION_LTR
+
+  if bit32.band(level, 1) ~= 0 then dir = harfbuzz.HB_DIRECTION_RTL end
+
+  return dir
+end
+
+local function shape_runs(runs, text)
+  local run = runs
+  while run ~= nil do
+    if run.font == nil then run = run.next end -- Don’t do anything to runs with no font
+    run.buffer = harfbuzz.Buffer.new()
+    run.buffer:add_codepoints(text, #text, run.pos, run.len)
+    run.buffer:set_script(run.script)
+    -- FIXME implement setting language as well
+    run.buffer:set_direction(run.direction)
+    -- TODO create font object
+    -- Call harfbuzz.shape
+  end
+end
+
+local function layout_nodes(head, dir)
+  debug.log("Paragraph Direction: %s\n", h.dir)
+  local base_dir
+  if head.dir == "TRT" then
+    base_dir = 1
+  elseif head.dir == "TLT" then
+    base_dir = 0
+  else
+    -- FIXME handle this better, and don’t throw an error.
+    debug.log("Paragraph direction %s unsupported. Bailing!\n", head.dir)
+    error("Unsupported Paragraph Direction")
+  end
+
   -- Convert node list to table
   nodetable = nodelist_to_table(head)
 
   -- Resolve scripts
   resolve_scripts(nodetable)
 
-  -- Reorder Runs
-  local runs = bidi_reordered_runs(nodetable, dir)
+  -- Apply BiDi algorithm and reorder Runs
+  local bidi_runs = bidi_reordered_runs(nodetable, base_dir)
 
   -- Break up runs further if required
-  
+  local runs = {}
+  local last
+  for i, bidi_run in ipairs(bidi_runs) do
+    local run = {}
+
+    if last then last.next = run end
+
+    run.direction = hb_dir(base_dir, bidi_run.level)
+
+    if harfbuzz.HB_DIRECTION_IS_BACKWARD(run.direction) then
+      run.pos = bidi_run.pos + bidi_run.len - 1
+      run.script = nodetable[run.pos].script
+      run.font = nodetable[run.pos].font
+      run.len = 0
+      for j = bidi_run.len - 1, 0, -1 do
+        if nodetable[run.pos].script ~= nodetable[bidi_run.pos + j].script or
+           nodetable[run.pos].font   ~= nodetable[bidi_run.pos + j].font then
+          -- Break run
+          local newrun = {}
+          newrun.pos = bidi_run.pos + j
+          newrun.len = 1
+          newrun.direction = hb_dir(base_dir, bidi_run.level)
+          newrun.script = nodetable[newrun.pos].script
+          newrun.font = nodetable[newrun.pos].font
+          run.next = newrun
+          run = newrun
+        else
+          run.len = run.len + 1
+          run.pos = bidi_run.pos + j
+        end
+      end
+    else
+      run.pos = bidi_run.pos
+      run.script = nodetable[run.pos].script
+      run.font = nodetable[run.pos].font
+      for j = 0, bidi_run.len - 1 do
+        if nodetable[run.pos].script ~= nodetable[bidi_run.pos + j].script or
+           nodetable[run.pos].font   ~= nodetable[bidi_run.pos + j].font then
+          -- Break run
+          local newrun = {}
+          newrun.pos = bidi_run.pos + j
+          newrun.len = 1
+          newrun.direction = hb_dir(base_dir, bidi_run.level)
+          newrun.script = nodetable[bidi_run.pos + j].script
+          newrun.font = nodetable[bidi_run.pos + j].font
+          run.next = newrun
+          run = newrun
+        else
+          run.len = run.len + 1
+        end
+      end
+    end
+    last = run
+    last.next = nil
+  end
+
   -- Do shaping
+  shape_runs(runs, nodetable)
+
   -- Convert shaped nodes to node list
 end
 
