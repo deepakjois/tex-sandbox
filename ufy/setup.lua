@@ -55,7 +55,7 @@ local function nodelist_to_table(head)
   for n in node.traverse(head) do
     local item = {}
     item.node = n
-    table.insert(nodetable,n)
+    table.insert(nodetable,item)
     if n.id == node.id("glyph") then -- regular char node
       item.char = n.char
       item.script = hb.unicode.script(item.char)
@@ -262,21 +262,25 @@ end
 local function shape_runs(runs, text)
   local run = runs
   while run ~= nil do
-    if run.font == nil then run = run.next end -- Don’t do anything to runs with no font
-    run.buffer = hb.Buffer.new()
-    run.buffer:add_codepoints(text, #text, run.pos - 1, run.len) -- Zero indexed offset
-    run.buffer:set_script(run.script)
-    -- FIXME implement setting language as well
-    run.buffer:set_direction(run.direction)
+    debug.log("Shaping Run")
+    if run.font ~= nil then -- Don’t do anything to runs with no font
+      debug.log("run length: %d start at pos: %d", run.len, run.pos)
+      run.buffer = hb.Buffer.new()
+      run.buffer:add_codepoints(text, run.pos - 1, run.len) -- Zero indexed offset
+      run.buffer:set_script(run.script)
+      -- FIXME implement setting language as well
+      run.buffer:set_direction(run.direction)
 
-    -- FIXME have a fallback for native TeX fonts
-    local metrics = font.getfont(run.font)
-    local face = hb.Face.new(metrics.filename)
-    local hb_font = hb.Font.new(face)
+      -- FIXME have a fallback for native TeX fonts
+      local metrics = font.getfont(run.font)
+      local face = hb.Face.new(metrics.filename)
+      local hb_font = hb.Font.new(face)
 
-    run.buffer:set_cluster_level(hb.Buffer.HB_BUFFER_CLUSTER_LEVEL_CHARACTERS)
-    -- FIXME implement support for features
-    hb.shape(hb_font,run.buffer)
+      run.buffer:set_cluster_level(hb.Buffer.HB_BUFFER_CLUSTER_LEVEL_CHARACTERS)
+      -- FIXME implement support for features
+      hb.shape(hb_font,run.buffer)
+    end
+    run = run.next
   end
 end
 
@@ -286,11 +290,12 @@ end
 
 local function nodetable_to_list(nodetable, runs, dir)
   local newhead, current
-  for _,run in ipairs(runs) do
+  local run = runs
+  while run ~= nil do
     if run.font == nil or not is_hb_font(run.font) then
       -- Copy the nodes as-is
       for i = run.pos, run.pos + run.len - 1 do
-        newhead, current = node.insert_after(newhead, current, nodetable[i])
+        newhead, current = node.insert_after(newhead, current, nodetable[i].node)
       end
     else
       local metrics = font.getfont(run.font)
@@ -345,6 +350,7 @@ local function nodetable_to_list(nodetable, runs, dir)
         -- current = node.slide(newhead)
       end
     end
+    run = run.next
   end
   return newhead
 end
@@ -365,19 +371,25 @@ local function layout_nodes(head)
   -- Convert node list to table
   local nodetable = nodelist_to_table(head)
 
+  debug.log("No. of nodes in table: %d", #nodetable)
+
   -- Resolve scripts
   resolve_scripts(nodetable)
 
   -- Apply BiDi algorithm and reorder Runs
   local bidi_runs = bidi_reordered_runs(nodetable, base_dir)
+  debug.log("No. of bidi runs: %d", #bidi_runs)
 
   -- Break up runs further if required
-  local runs = {}
+  local runs
   local last
   for _, bidi_run in ipairs(bidi_runs) do
     local run = {}
-
-    if last then last.next = run end
+    if last then
+      last.next = run
+    else
+      runs = run
+    end
 
     run.direction = hb_dir(base_dir, bidi_run.level)
 
@@ -407,9 +419,11 @@ local function layout_nodes(head)
       run.pos = bidi_run.pos
       run.script = nodetable[run.pos].script
       run.font = nodetable[run.pos].font
+      run.len = 0
       for j = 0, bidi_run.len - 1 do
         if nodetable[run.pos].script ~= nodetable[bidi_run.pos + j].script or
            nodetable[run.pos].font   ~= nodetable[bidi_run.pos + j].font then
+          debug.log("Breaking Run")
           -- Break run
           local newrun = {}
           newrun.pos = bidi_run.pos + j
@@ -429,7 +443,11 @@ local function layout_nodes(head)
   end
 
   -- Do shaping
-  shape_runs(runs, nodetable)
+  local text = {}
+  for _, n in ipairs(nodetable) do
+    table.insert(text, n.char)
+  end
+  shape_runs(runs, text)
 
   -- Convert shaped nodes to node list
   local newhead = nodetable_to_list(nodetable, runs, head.dir)
@@ -447,8 +465,8 @@ callback.register("pre_linebreak_filter", function(head, groupcode)
   return true
 end)
 
-callback.register("hpack_filter", function(head, groupcode)
-  debug.log("HPACK_FILTER. Group Code is %s", groupcode == "" and "main vertical list" or groupcode)
-  debug.show_nodes(head)
-  return true
-end)
+-- callback.register("hpack_filter", function(head, groupcode)
+--   debug.log("HPACK_FILTER. Group Code is %s", groupcode == "" and "main vertical list" or groupcode)
+--   debug.show_nodes(head)
+--   return true
+-- end)
