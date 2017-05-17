@@ -213,10 +213,13 @@ local function bidi_reordered_runs(nodetable, base_dir)
 
   local max_level = 0
   local min_odd_level = bidi.MAX_DEPTH + 2
-  for _,l in ipairs(levels) do
+  for i,l in ipairs(levels) do
+    debug.log("idx: %d, level: %d", i, l)
     if l > max_level then max_level = l end
     if bit32.band(l, 1) ~= 0 and l < min_odd_level then min_odd_level = l end
   end
+
+  debug.log("max_level: %d, min_odd_level: %d", max_level, min_odd_level)
 
   local runs = {}
   local run_start = 1
@@ -233,6 +236,8 @@ local function bidi_reordered_runs(nodetable, base_dir)
     run_start = run_end
   end
 
+  debug.log("No. of runs: %d", #runs)
+
   -- L2. From the highest level found in the text to the lowest odd level on
   -- each line, including intermediate levels not actually present in the text,
   -- reverse any contiguous sequence of characters that are at that level or
@@ -240,10 +245,13 @@ local function bidi_reordered_runs(nodetable, base_dir)
   for l = max_level, min_odd_level, -1 do
     local i = #runs
     while i > 0 do
-      local e = i
+      if runs[i].level >= l then
+        local e = i
+        i = i - 1
+        while i > 0 and runs[i].level >= l do i = i - 1 end
+        reverse_runs(runs, i+1, e - i)
+      end
       i = i - 1
-      while i > 0 and runs[i].level >= l do i = i - 1 end
-      reverse_runs(runs, i+1, e - i)
     end
   end
 
@@ -262,9 +270,9 @@ end
 local function shape_runs(runs, text)
   local run = runs
   while run ~= nil do
-    debug.log("Shaping Run")
-    if run.font ~= nil then -- Don’t do anything to runs with no font
-      debug.log("run length: %d start at pos: %d", run.len, run.pos)
+    debug.log("Shaping run. length: %d start at pos: %d", run.len, run.pos)
+    if run.font ~= nil then -- Only process runs with a valid font.
+      debug.log("Valid shaping run.")
       run.buffer = hb.Buffer.new()
       run.buffer:add_codepoints(text, run.pos - 1, run.len) -- Zero indexed offset
       run.buffer:set_script(run.script)
@@ -289,10 +297,18 @@ local function is_hb_font(fontid)
 end
 
 local function nodetable_to_list(nodetable, runs, dir)
+  debug.log("Constructing new nodelist…")
   local newhead, current
   local run = runs
+  if dir == "TRT" then -- add a prev pointer to runs
+    while run.next ~= nil do
+      run.next.prev = run
+      run = run.next
+    end
+  end
   while run ~= nil do
     if run.font == nil or not is_hb_font(run.font) then
+      debug.log("copying %d to %d as is", run.pos, run.len - 1)
       -- Copy the nodes as-is
       for i = run.pos, run.pos + run.len - 1 do
         newhead, current = node.insert_after(newhead, current, nodetable[i].node)
@@ -338,10 +354,12 @@ local function nodetable_to_list(nodetable, runs, dir)
           if k then
             if dir == 'TRT' then -- kerning goes before glyph
               k.next = n
-              current.next = k
+              newhead, current = node.insert_after(newhead, current, k)
+              current = node.slide(current)
             else -- kerning goes after glyph
               n.next = k
-              current.next = n
+              newhead, current = node.insert_after(newhead, current, n)
+              current = node.slide(current)
             end
           else -- no kerning
             newhead, current = node.insert_after(newhead,current,n)
@@ -350,7 +368,7 @@ local function nodetable_to_list(nodetable, runs, dir)
         -- current = node.slide(newhead)
       end
     end
-    run = run.next
+    if dir == "TRT" then run = run.prev else run = run.next end
   end
   return newhead
 end
@@ -460,9 +478,9 @@ callback.register("pre_linebreak_filter", function(head, groupcode)
 
   local newhead = layout_nodes(head)
 
-  debug.show_nodes(newhead)
+  debug.show_nodes(newhead, true)
 
-  return true
+  return newhead
 end)
 
 -- callback.register("hpack_filter", function(head, groupcode)
