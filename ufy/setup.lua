@@ -267,12 +267,16 @@ local function hb_dir(_, level)
   return dir
 end
 
+local function is_hb_font(fontid)
+  return font.getfont(fontid).harfbuzz
+end
+
 local function shape_runs(runs, text)
   local run = runs
   while run ~= nil do
     debug.log("Shaping run. length: %d start at pos: %d", run.len, run.pos)
-    if run.font ~= nil then -- Only process runs with a valid font.
-      debug.log("Valid shaping run.")
+    if run.font ~= nil and is_hb_font(run.font) then -- Only process runs with a valid font.
+      debug.log("Valid Harfbuzz shaping run.")
       run.buffer = hb.Buffer.new()
       run.buffer:add_codepoints(text, run.pos - 1, run.len) -- Zero indexed offset
       run.buffer:set_script(run.script)
@@ -292,10 +296,6 @@ local function shape_runs(runs, text)
   end
 end
 
-local function is_hb_font(fontid)
-  return font.getfont(fontid).harfbuzz
-end
-
 local function nodetable_to_list(nodetable, runs, dir)
   debug.log("Constructing new nodelist…")
   local newhead, current
@@ -308,9 +308,17 @@ local function nodetable_to_list(nodetable, runs, dir)
   end
   while run ~= nil do
     if run.font == nil or not is_hb_font(run.font) then
-      debug.log("copying %d to %d as is", run.pos, run.len - 1)
+      local start = run.pos
+      local end_ = run.pos + run.len - 1
+      local inc = 1
+      if dir == 'TRT' and run.font ~= nil then
+        start, end_ = end_,start
+        inc = -1
+      end
+
+      debug.log("copying %d to %d as is", start, end_)
       -- Copy the nodes as-is
-      for i = run.pos, run.pos + run.len - 1 do
+      for i = start, end_, inc do
         newhead, current = node.insert_after(newhead, current, nodetable[i].node)
       end
     else
@@ -318,10 +326,12 @@ local function nodetable_to_list(nodetable, runs, dir)
       -- Get the glyphs and append them to list
       if dir == 'TRT' then run.buffer:reverse() end
       local glyphs = run.buffer:get_glyph_infos_and_positions()
+      debug.log("Run start: %d, Run length: %d, No. of glyphs: %d", run.pos, run.len, #glyphs)
 
       for _, v in ipairs(glyphs) do
         local n,k -- Node and (optional) Kerning
         local char = metrics.backmap[v.codepoint]
+        debug.log("glyph idx: U+%04X, glyph cluster: %d", char, v.cluster + 1)
         if nodetable[v.cluster+1].char == 0x20 then
           assert(char == 0x20 or char == 0xa0, "Expected char to be 0x20 or 0xa0")
           n = node.new("glue")
@@ -344,8 +354,10 @@ local function nodetable_to_list(nodetable, runs, dir)
 
           -- Adjust kerning if Harfbuzz’s x_advance does not match glyph width
           local x_advance = upem_to_sp(v.x_advance, metrics)
-          if  math.abs(x_advance - n.width) > 1 then -- needs kerning
+          debug.log("v.x_advance: %d, x_advance: %d, n.width: %d", v.x_advance, x_advance, n.width)
+          if math.abs(x_advance - n.width) > 1 then -- needs kerning
             k = node.new("kern")
+            k.subtype = 1
             k.kern = (x_advance - n.width)
           end
 
@@ -354,12 +366,12 @@ local function nodetable_to_list(nodetable, runs, dir)
           if k then
             if dir == 'TRT' then -- kerning goes before glyph
               k.next = n
-              newhead, current = node.insert_after(newhead, current, k)
-              current = node.slide(current)
+              current.next = k
+              current = n
             else -- kerning goes after glyph
               n.next = k
-              newhead, current = node.insert_after(newhead, current, n)
-              current = node.slide(current)
+              current.next = n
+              current = k
             end
           else -- no kerning
             newhead, current = node.insert_after(newhead,current,n)
