@@ -3,8 +3,9 @@ ufy.loader.revert_package_searchers()
 
 local debug = dofile("debug.lua")
 local bidi = require("bidi")
+local ucdn = require("ucdn")
 local fonts = require("ufy.fonts")
-local harfbuzz = require("harfbuzz")
+local hb = require("harfbuzz")
 
 -- Tex Setup
 tex.enableprimitives('',tex.extraprimitives())
@@ -25,8 +26,6 @@ end
 
 -- Register OpenType font loader in define_font callback.
 callback.register('define_font', read_font, "font loader")
-
-local lt_to_hb_dir = { TLT = "ltr", TRT = "rtl" }
 
 local function upem_to_sp(v,metrics)
   return math.floor(v / metrics.units_per_em * metrics.size)
@@ -59,12 +58,12 @@ local function nodelist_to_table(head)
     table.insert(nodetable,n)
     if n.id == node.id("glyph") then -- regular char node
       item.char = n.char
-      item.script = harfbuzz.unicode.script(item.char)
+      item.script = hb.unicode.script(item.char)
       item.font = n.font
       last_font = item.font
     elseif n.id == node.id("glue") and n.subtype == 13 then -- space skip
       item.char = 0x0020
-      item.script = harfbuzz.unicode.script(item.char)
+      item.script = hb.unicode.script(item.char)
       item.font = last_font
     else
       item.char = 0xfffc
@@ -77,15 +76,15 @@ end
 -- FIXME use BiDi properties (via UCDN) to determine whether characters are paired
 -- or not.
 local paired_chars = {
-  0x0028, 0x0029, /* ascii paired punctuation */
+  0x0028, 0x0029, -- ascii paired punctuation
   0x003c, 0x003e,
   0x005b, 0x005d,
   0x007b, 0x007d,
-  0x00ab, 0x00bb, /* guillemets */
-  0x2018, 0x2019, /* general punctuation */
+  0x00ab, 0x00bb, -- guillemets
+  0x2018, 0x2019, -- general punctuation
   0x201c, 0x201d,
   0x2039, 0x203a,
-  0x3008, 0x3009, /* chinese paired punctuation */
+  0x3008, 0x3009, -- chinese paired punctuation
   0x300a, 0x300b,
   0x300c, 0x300d,
   0x300e, 0x300f,
@@ -109,7 +108,7 @@ local function get_pair_index(char)
     else
       return mid
     end
-
+  end
   return 0
 end
 
@@ -125,11 +124,11 @@ end
 local function resolve_scripts(nodetable)
   local last_script_index = 0
   local last_set_index = 0
-  local last_script_value = harfbuzz.HB_SCRIPT_INVALID
+  local last_script_value = hb.Script.HB_SCRIPT_INVALID
   local stack = { top = 0 }
 
   for i,v in ipairs(nodetable) do
-    if v.script == harfbuzz.HB_SCRIPT_COMMON and last_script_index ~= 0 then
+    if v.script == hb.Script.HB_SCRIPT_COMMON and last_script_index ~= 0 then
       local pair_index = get_pair_index(v.char)
       if pair_index > 0 then
         if is_open(pair_index) then -- paired character (open)
@@ -141,7 +140,7 @@ local function resolve_scripts(nodetable)
           -- find matching opening (by getting the last odd index for current
           -- even index)
           local pi = pair_index - 1
-          while stack.top > 0 and stack[stack.top].pair_index != pi do
+          while stack.top > 0 and stack[stack.top].pair_index ~= pi do
             stack.top = stack.top - 1
           end
 
@@ -158,7 +157,7 @@ local function resolve_scripts(nodetable)
         nodetable[i].script = last_script_value
         last_set_index = i
       end
-    elseif v.script == harfbuzz.HB_SCRIPT_INHERITED and last_script_index ~= 0 then
+    elseif v.script == hb.Script.HB_SCRIPT_INHERITED and last_script_index ~= 0 then
       v.script = last_script_value
       last_set_index = i
     else
@@ -193,12 +192,12 @@ local function bidi_reordered_runs(nodetable, base_dir)
 
   local para = bidi.Paragraph.new(types, pair_types, pair_values, base_dir)
 
-  local linebreaks = { #codes + 1 }
+  local linebreaks = { #codepoints + 1 }
   local levels = para:getLevels(linebreaks)
 
   -- FIXME handle embedded RLE, LRE, RLI, LRI and PDF characters at this point and remove them.
 
-  if #levels = 0 then return runs end
+  if #levels == 0 then return {} end
 
   -- L1. Reset the embedding level of the following characters to the paragraph embedding level:
   -- …<snip>…
@@ -214,7 +213,7 @@ local function bidi_reordered_runs(nodetable, base_dir)
 
   local max_level = 0
   local min_odd_level = bidi.MAX_DEPTH + 2
-  for i,l in ipairs(levels) do
+  for _,l in ipairs(levels) do
     if l > max_level then max_level = l end
     if bit32.band(l, 1) ~= 0 and l < min_odd_level then min_odd_level = l end
   end
@@ -252,10 +251,10 @@ local function bidi_reordered_runs(nodetable, base_dir)
 end
 
 -- FIXME handle vertical directions as well.
-local function hb_dir(base_dir, level)
-  local dir = harfbuzz.HB_DIRECTION_LTR
+local function hb_dir(_, level)
+  local dir = hb.Direction.HB_DIRECTION_LTR
 
-  if bit32.band(level, 1) ~= 0 then dir = harfbuzz.HB_DIRECTION_RTL end
+  if bit32.band(level, 1) ~= 0 then dir = hb.Direction.HB_DIRECTION_RTL end
 
   return dir
 end
@@ -264,18 +263,94 @@ local function shape_runs(runs, text)
   local run = runs
   while run ~= nil do
     if run.font == nil then run = run.next end -- Don’t do anything to runs with no font
-    run.buffer = harfbuzz.Buffer.new()
-    run.buffer:add_codepoints(text, #text, run.pos, run.len)
+    run.buffer = hb.Buffer.new()
+    run.buffer:add_codepoints(text, #text, run.pos - 1, run.len) -- Zero indexed offset
     run.buffer:set_script(run.script)
     -- FIXME implement setting language as well
     run.buffer:set_direction(run.direction)
-    -- TODO create font object
-    -- Call harfbuzz.shape
+
+    -- FIXME have a fallback for native TeX fonts
+    local metrics = font.getfont(run.font)
+    local face = hb.Face.new(metrics.filename)
+    local hb_font = hb.Font.new(face)
+
+    run.buffer:set_cluster_level(hb.Buffer.HB_BUFFER_CLUSTER_LEVEL_CHARACTERS)
+    -- FIXME implement support for features
+    hb.shape(hb_font,run.buffer)
   end
 end
 
-local function layout_nodes(head, dir)
-  debug.log("Paragraph Direction: %s\n", h.dir)
+local function is_hb_font(fontid)
+  return font.getfont(fontid).harfbuzz
+end
+
+local function nodetable_to_list(nodetable, runs, dir)
+  local newhead, current
+  for _,run in ipairs(runs) do
+    if run.font == nil or not is_hb_font(run.font) then
+      -- Copy the nodes as-is
+      for i = run.pos, run.pos + run.len - 1 do
+        newhead, current = node.insert_after(newhead, current, nodetable[i])
+      end
+    else
+      local metrics = font.getfont(run.font)
+      -- Get the glyphs and append them to list
+      if dir == 'TRT' then run.buffer:reverse() end
+      local glyphs = run.buffer:get_glyph_infos_and_positions()
+
+      for _, v in ipairs(glyphs) do
+        local n,k -- Node and (optional) Kerning
+        local char = metrics.backmap[v.codepoint]
+        if nodetable[v.cluster+1].char == 0x20 then
+          assert(char == 0x20 or char == 0xa0, "Expected char to be 0x20 or 0xa0")
+          n = node.new("glue")
+          n.subtype = 13
+          n.width = metrics.parameters.space
+          n.stretch = metrics.parameters.space_stretch
+          n.shrink = metrics.parameters.space_shrink
+          newhead,current = node.insert_after(newhead, current, n)
+        else
+          -- Create glyph node
+          n = node.new("glyph")
+          n.font = run.font
+          n.char = char
+          n.subtype = 0
+
+          -- Set offsets from Harfbuzz data
+          n.yoffset = upem_to_sp(v.y_offset, metrics)
+          n.xoffset = upem_to_sp(v.x_offset, metrics)
+          if dir == 'TRT' then n.xoffset = n.xoffset * -1 end
+
+          -- Adjust kerning if Harfbuzz’s x_advance does not match glyph width
+          local x_advance = upem_to_sp(v.x_advance, metrics)
+          if  math.abs(x_advance - n.width) > 1 then -- needs kerning
+            k = node.new("kern")
+            k.kern = (x_advance - n.width)
+          end
+
+          -- Insert glyph node into new list,
+          -- adjusting for direction and kerning.
+          if k then
+            if dir == 'TRT' then -- kerning goes before glyph
+              k.next = n
+              current.next = k
+            else -- kerning goes after glyph
+              n.next = k
+              current.next = n
+            end
+          else -- no kerning
+            newhead, current = node.insert_after(newhead,current,n)
+          end
+        end
+        -- current = node.slide(newhead)
+      end
+    end
+  end
+  return newhead
+end
+
+local function layout_nodes(head)
+  debug.log("Paragraph Direction: %s\n", head.dir)
   local base_dir
   if head.dir == "TRT" then
     base_dir = 1
@@ -284,11 +359,11 @@ local function layout_nodes(head, dir)
   else
     -- FIXME handle this better, and don’t throw an error.
     debug.log("Paragraph direction %s unsupported. Bailing!\n", head.dir)
-    error("Unsupported Paragraph Direction")
+    return head
   end
 
   -- Convert node list to table
-  nodetable = nodelist_to_table(head)
+  local nodetable = nodelist_to_table(head)
 
   -- Resolve scripts
   resolve_scripts(nodetable)
@@ -299,14 +374,14 @@ local function layout_nodes(head, dir)
   -- Break up runs further if required
   local runs = {}
   local last
-  for i, bidi_run in ipairs(bidi_runs) do
+  for _, bidi_run in ipairs(bidi_runs) do
     local run = {}
 
     if last then last.next = run end
 
     run.direction = hb_dir(base_dir, bidi_run.level)
 
-    if harfbuzz.HB_DIRECTION_IS_BACKWARD(run.direction) then
+    if hb.Direction.HB_DIRECTION_IS_BACKWARD(run.direction) then
       run.pos = bidi_run.pos + bidi_run.len - 1
       run.script = nodetable[run.pos].script
       run.font = nodetable[run.pos].font
@@ -357,138 +432,17 @@ local function layout_nodes(head, dir)
   shape_runs(runs, nodetable)
 
   -- Convert shaped nodes to node list
-end
-
-local function shape_run(head,dir)
-  local fnt = head.font
-  local metrics = font.getfont(fnt)
-  if not metrics.harfbuzz then return head end
-
-  -- Build text
-  local codepoints = { }
-  for n in node.traverse(head) do
-    if n.id == node.id("glyph") then
-      table.insert(codepoints, n.char)
-    elseif n.id == node.id("glue") and n.subtype == 13 then
-      table.insert(codepoints, 0x20)
-    else
-      error(string.format("Cant shape node of type %s, subtype %s", node.type(n.id), tostring(n.subtype)))
-    end
-  end
-
-  -- Shape text
-  local buf = harfbuzz.Buffer.new()
-  local face = harfbuzz.Face.new(metrics.filename)
-  local hb_font = harfbuzz.Font.new(face)
-
-  buf:set_cluster_level(harfbuzz.Buffer.HB_BUFFER_CLUSTER_LEVEL_CHARACTERS)
-  buf:add_codepoints(codepoints)
-  harfbuzz.shape(hb_font,buf, { direction = lt_to_hb_dir[dir]})
-
-  -- Create new nodes from shaped text
-  if dir == 'TRT' then buf:reverse() end
-  local glyphs = buf:get_glyph_infos_and_positions()
-
-  local newhead = nil
-  local current = nil
-
-  for _, v in ipairs(glyphs) do
-    local n,k -- Node and (optional) Kerning
-    local char = metrics.backmap[v.codepoint]
-    if codepoints[v.cluster+1] == 0x20 then
-      assert(char == 0x20 or char == 0xa0, "Expected char to be 0x20 or 0xa0")
-      n = node.new("glue")
-      n.subtype = 13
-      n.width = metrics.parameters.space
-      n.stretch = metrics.parameters.space_stretch
-      n.shrink = metrics.parameters.space_shrink
-      newhead = node.insert_after(newhead, current, n)
-    else
-      -- Create glyph node
-      n = node.new("glyph")
-      n.font = fnt
-      n.char = char
-      n.subtype = 0
-
-      -- Set offsets from Harfbuzz data
-      n.yoffset = upem_to_sp(v.y_offset, metrics)
-      n.xoffset = upem_to_sp(v.x_offset, metrics)
-      if dir == 'TRT' then n.xoffset = n.xoffset * -1 end
-
-      -- Adjust kerning if Harfbuzz’s x_advance does not match glyph width
-      local x_advance = upem_to_sp(v.x_advance, metrics)
-      if  math.abs(x_advance - n.width) > 1 then -- needs kerning
-        k = node.new("kern")
-        k.kern = (x_advance - n.width)
-      end
-
-      -- Insert glyph node into new list,
-      -- adjusting for direction and kerning.
-      if k then
-        if dir == 'TRT' then -- kerning goes before glyph
-          k.next = n
-          current.next = k
-        else -- kerning goes after glyph
-          n.next = k
-          current.next = n
-        end
-      else -- no kerning
-        newhead = node.insert_after(newhead,current,n)
-      end
-    end
-    current = node.slide(newhead)
-  end
-
+  local newhead = nodetable_to_list(nodetable, runs, head.dir)
   return newhead
-end
-
-local function shape_runs(head)
-  local curr = head
-  while true do
-    if curr.next == nil then break end
-
-    if curr.next.id == node.id("glyph") then
-      -- Start shaping run
-      local start_run = curr.next
-      local fnt = start_run.font
-      local end_run = start_run.next
-      while true do
-        if end_run == nil then
-          break
-        elseif end_run.id == node.id("glyph") and end_run.font == fnt then
-          -- keep going
-          end_run = end_run.next
-         elseif end_run.id == node.id("glue") and end_run.subtype == 13 then
-          -- keep going
-          end_run = end_run.next
-        else
-          break
-        end
-      end
-
-      local run = node.copy_list(start_run, end_run)
-      print(string.format("\nShaping run of %d nodes\n", node.length(run)))
-      local shaped = shape_run(run,head.dir)
-      curr.next = shaped
-      shaped = node.slide(shaped)
-      shaped.next = end_run
-      end_run.prev = shaped
-      curr = shaped
-    else
-      -- Move to next node
-      curr = curr.next
-    end
-  end
 end
 
 callback.register("pre_linebreak_filter", function(head, groupcode)
   debug.log("PRE LINE BREAK. Group Code is %s", groupcode == "" and "main vertical list" or groupcode)
-  -- debug.show_nodes(head)
+  debug.show_nodes(head)
 
-  -- Apply Unicode BiDi algorithm on nodes
-  bidi_reorder_nodes(head)
+  local newhead = layout_nodes(head)
 
-  shape_runs(head)
+  debug.show_nodes(newhead)
 
   return true
 end)
@@ -498,4 +452,3 @@ callback.register("hpack_filter", function(head, groupcode)
   debug.show_nodes(head)
   return true
 end)
-
