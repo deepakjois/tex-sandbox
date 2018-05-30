@@ -3,7 +3,7 @@ ufy.loader.add_lua_searchers()
 
 tex.enableprimitives('',tex.extraprimitives())
 
-local debug = dofile("debug.lua")
+local debug = require("ufylayout.debug")
 
 -- Switch off some callbacks.
 callback.register("hyphenate", false)
