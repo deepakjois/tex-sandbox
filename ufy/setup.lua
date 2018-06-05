@@ -17,3 +17,7 @@ callback.register("pre_linebreak_filter", function(head)
   return true
 end)
 
+callback.register("contribute_filter", function(extrainfo)
+  debug.log("CONTRIBUTE FILTER: %s", extrainfo)
+end)
+

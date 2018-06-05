@@ -1,0 +1,2 @@
+#!/bin/sh
+ufytex --lua=pre_init.lua --shell-escape --output-format=pdf $1
